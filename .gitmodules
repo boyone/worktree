@@ -1,0 +1,3 @@
+[submodule "api-submodule"]
+	path = api-submodule
+	url = git@github.com:boyone/api-submodule.git
