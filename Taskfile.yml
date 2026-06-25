@@ -1,0 +1,59 @@
+version: '3'
+
+vars:
+  API_DIR: services/api
+  WORKER_DIR: services/worker
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  status:
+    desc: Show submodule SHAs and any drift from remotes
+    cmds:
+      - "git submodule foreach 'echo \"$name → $(git rev-parse --short HEAD) (branch: $(git rev-parse --abbrev-ref HEAD))\"'"
+      - 'echo "---"'
+      - git submodule status 
+
+  bump:
+    desc: Pull latest from each sub's tracked branch, stage SHA changes
+    cmds:
+      - git submodule update --remote
+      - git submodule status 
+      - 'echo "---"'
+      - 'echo "If SHAs changed above, run: git add/commit"'
+
+  commit-bump:
+    desc: Commit any staged submodule pointer updates
+    prompt: "Commit message for submodule bumps:"
+    cmds:
+      - 'git commit -m "{{.CLI_ARGS}}" || echo "nothing to commit"'
+      - 'git push || echo "no remote or nothing to push"'
+
+  build:
+    desc: Build Docker images for api and worker via each submodule's Taskfile
+    cmds:
+      - task --dir {{.API_DIR}} docker:build
+      - task --dir {{.WORKER_DIR}} docker:build
+
+  build:api:
+    desc: Build only the api image
+    cmds:
+      - task --dir {{.API_DIR}} docker:build
+
+  build:worker:
+    desc: Build only the worker image
+    cmds:
+      - task --dir {{.WORKER_DIR}} docker:build
+
+  up:
+    desc: Build images and start the stack
+    cmds:
+      - task: build
+      - docker compose up -d
+
+  down:
+    desc: Stop the stack
+    cmds:
+      - docker compose down
