@@ -1,8 +1,7 @@
 version: '3'
 
 vars:
-  API_DIR: services/api
-  WORKER_DIR: services/worker
+  API_DIR: api-submodule
 
 tasks:
   default:
@@ -35,17 +34,11 @@ tasks:
     desc: Build Docker images for api and worker via each submodule's Taskfile
     cmds:
       - task --dir {{.API_DIR}} docker:build
-      - task --dir {{.WORKER_DIR}} docker:build
 
   build:api:
     desc: Build only the api image
     cmds:
       - task --dir {{.API_DIR}} docker:build
-
-  build:worker:
-    desc: Build only the worker image
-    cmds:
-      - task --dir {{.WORKER_DIR}} docker:build
 
   up:
     desc: Build images and start the stack
